@@ -1,0 +1,15 @@
+apscheduler==3.11.0
+asyncpg==0.30.0
+bson==0.5.10
+environs==11.2.1
+fastapi-cache==0.1.0
+greenlet==3.1.1
+httptools==0.6.1
+motor==3.6.0
+pip-chill==1.0.3
+pyyaml==6.0.1
+redis==5.2.1
+sqlalchemy==2.0.36
+uvloop==0.19.0
+watchfiles==0.21.0
+websockets==12.0
