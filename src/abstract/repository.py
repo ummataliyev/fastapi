@@ -1,3 +1,6 @@
+"""
+Base class for repositories
+"""
 from typing import Type
 from typing import TypeVar
 

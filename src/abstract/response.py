@@ -1,3 +1,6 @@
+"""
+Base class for routers response
+"""
 from typing import Type
 from typing import TypeVar
 from typing import Generic
@@ -23,7 +26,7 @@ class BaseResponse(Generic[T]):
         """
         return {
             "status": "success",
-            "message": message or f"{self.model.__name__} fetched successfully",
+            "message": message or f"{self.model.__name__} fetched successfully", # noqa
             "data": self.to_dict(record)
         }
 

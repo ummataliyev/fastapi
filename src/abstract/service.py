@@ -1,9 +1,13 @@
-from sqlalchemy.ext.asyncio import AsyncSession
-from src.abstract.repository import BaseRepository
-
+"""
+Base class for repository service
+"""
 from typing import Type
 from typing import TypeVar
 from typing import Generic
+
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from src.abstract.repository import BaseRepository
 
 
 T = TypeVar('T')

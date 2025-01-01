@@ -1,3 +1,6 @@
+"""
+Initialize routers
+"""
 from fastapi import Response
 from fastapi import APIRouter
 from fastapi.responses import PlainTextResponse

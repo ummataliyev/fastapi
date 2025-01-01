@@ -1,5 +1,8 @@
+"""
+User response
+"""
 from src.models.user import User
-from src.schemas.user import UserRead
+from src.schemes.user import UserRead
 from src.abstract.response import BaseResponse
 
 

@@ -1,13 +1,17 @@
+"""
+User routes
+"""
 from fastapi import Depends
 from fastapi import APIRouter
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.schemas.user import User
-from src.schemas.user import UserRead
-from src.response.user import UserResponse
+from src.schemes.user import User
+from src.schemes.user import UserRead
 from src.services.user import UserService
+from src.response.user import UserResponse
 from src.abstract.scheme import APIResponse
+
 from db.storage.postgres import get_db
 
 router = APIRouter()
