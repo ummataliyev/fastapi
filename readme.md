@@ -1,6 +1,6 @@
 # FastAPI
 
-## Project Overview
+## Overview
 
 This project is a template for building a FastAPI application with the following features:
 
