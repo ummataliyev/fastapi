@@ -5,7 +5,11 @@ from sqlalchemy import func
 
 from cryptography import fernet
 
-f = fernet.Fernet("YGpNVq-tE_rjv6ijUwLPE7K-djhOIOGyy_e4lFCw1Bc=")
+from libs.environs import env
+
+FERNET_KEY = env.str("FERNET_KEY")
+
+f = fernet.Fernet(FERNET_KEY)
 
 
 async def get_count(db, q, model):
