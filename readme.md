@@ -1,4 +1,4 @@
-# FastAPI Project Template
+# FastAPI
 
 ## Project Overview
 
