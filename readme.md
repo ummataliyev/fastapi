@@ -25,4 +25,4 @@ Make sure you have the following prerequisites:
 - **Pydantic**: [https://docs.pydantic.dev/latest/](https://docs.pydantic.dev/latest/)
 - **Alembic**: [https://alembic.sqlalchemy.org/en/latest/](https://alembic.sqlalchemy.org/en/latest/)
 
-<img src="./ai.jpeg" alt="FastAPI Project Overview" width="300" />
+<img src="./ai.jpeg" alt="FastAPI Project Overview" width="50" />
