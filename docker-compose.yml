@@ -1,0 +1,55 @@
+version: '3.8'
+
+services:
+  fastapi:
+    build: .
+    container_name: ${SERVICE_NAME}
+    ports:
+      - "8000:8000"
+    depends_on:
+      - postgres
+      - redis
+      - mongo
+    environment:
+      - DB_USER=${DB_USER}
+      - DB_NAME=${DB_NAME}
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_PASSWORD=${DB_PASSWORD}
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - MONGODB_URL=${MONGODB_URL}
+    networks:
+      - app-network
+
+  postgres:
+    image: postgres:15.2
+    container_name: postgres-db
+    environment:
+      - POSTGRES_USER=${DB_USER}
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+      - POSTGRES_DB=${DB_NAME}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - app-network
+
+  redis:
+    image: redis:6.2
+    container_name: redis
+    networks:
+      - app-network
+
+  mongo:
+    image: mongo:latest
+    container_name: mongo-db
+    networks:
+      - app-network
+
+volumes:
+  postgres_data:
+    driver: local
+
+networks:
+  app-network:
+    driver: bridge
