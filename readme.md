@@ -1,4 +1,7 @@
-# FastAPI
+<div style="display: flex; justify-content: space-between; align-items: center;">
+  <h1>FastAPI</h1>
+  <img src="./ai.jpeg" alt="FastAPI Project Overview" width="50" />
+</div>
 
 ## Overview
 
@@ -24,5 +27,3 @@ Make sure you have the following prerequisites:
 - **FastAPI**: [https://fastapi.tiangolo.com/](https://fastapi.tiangolo.com/)
 - **Pydantic**: [https://docs.pydantic.dev/latest/](https://docs.pydantic.dev/latest/)
 - **Alembic**: [https://alembic.sqlalchemy.org/en/latest/](https://alembic.sqlalchemy.org/en/latest/)
-
-<img src="./ai.jpeg" alt="FastAPI Project Overview" width="50" />
