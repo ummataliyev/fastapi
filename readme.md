@@ -11,7 +11,7 @@ This project is a template for building a FastAPI application with the following
 - **Alembic**: Database migrations for PostgreSQL.
 - **Pydantic**: For data validation with user input and API responses.
 
-## Requirements
+### Requirements
 
 Make sure you have the following prerequisites:
 
