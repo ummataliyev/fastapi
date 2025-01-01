@@ -1,6 +1,6 @@
 <div style="display: flex; justify-content: space-between; align-items: center;">
   <h1>FastAPI</h1>
-  <img src="./ai.jpeg" alt="FastAPI Project Overview" width="50" />
+  <img src="./ai.jpeg" alt="FastAPI Project Overview" width="250" />
 </div>
 
 ## Overview
