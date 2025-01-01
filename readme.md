@@ -21,6 +21,6 @@ Make sure you have the following prerequisites:
 - **MongoDB** (optional, for NoSQL data storage)
 
 ## Docs
-- **FastAPI**: [https://fastapi.tiangolo.com/](https://fastapi.tiangolo.com/)
+- **FastAPI**: [![FastAPI Logo](https://fastapi.tiangolo.com/img/logo.svg)](https://fastapi.tiangolo.com/)
 - **Pydantic**: [https://docs.pydantic.dev/latest/](https://docs.pydantic.dev/latest/)
 - **Alembic**: [https://alembic.sqlalchemy.org/en/latest/](https://alembic.sqlalchemy.org/en/latest/)
