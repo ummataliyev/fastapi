@@ -1,13 +1,19 @@
+"""
+Main file for running the application
+"""
 from fastapi import FastAPI
-from starlette.requests import Request
-from fastapi.middleware.cors import CORSMiddleware
-from fastapi.exceptions import HTTPException, RequestValidationError
+from fastapi.exceptions import HTTPException
 from fastapi.responses import PlainTextResponse
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.exceptions import RequestValidationError
 
-from db.storage.postgres import async_session
+from starlette.requests import Request
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 
-from src.routers import routers, home_router
+from src.routers import routers
+from src.routers import home_router
+
+from db.storage.postgres import async_session
 
 
 app = FastAPI(
@@ -39,16 +45,21 @@ async def db_session_middleware(request: Request, call_next):
 
 
 @app.exception_handler(HTTPException)
-async def http_exception_handler(request: Request, exc: HTTPException):
+async def http_exception_handler(
+    request: Request,
+    exc: HTTPException
+):
     return PlainTextResponse(str(exc.detail), status_code=exc.status_code)
 
 
 @app.exception_handler(RequestValidationError)
-async def validation_exception_handler(request: Request, exc: RequestValidationError):
+async def validation_exception_handler(
+    request: Request,
+    exc: RequestValidationError
+):
     return PlainTextResponse(str(exc), status_code=400)
 
 
-# Event to run tasks at app startup
 @app.on_event('startup')
 async def on_startup():
     scheduler = AsyncIOScheduler()
