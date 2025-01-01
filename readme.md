@@ -11,7 +11,7 @@ This project is a template for building a FastAPI application with the following
 - **Alembic**: Database migrations for PostgreSQL.
 - **Pydantic**: For data validation with user input and API responses.
 
-### Requirements
+## Requirements
 
 Make sure you have the following prerequisites:
 
@@ -20,7 +20,7 @@ Make sure you have the following prerequisites:
 - **Redis** (optional, for caching)
 - **MongoDB** (optional, for NoSQL data storage)
 
-### Docs
+## Docs
 - **FastAPI**: [https://fastapi.tiangolo.com/](https://fastapi.tiangolo.com/)
 - **Pydantic**: [https://docs.pydantic.dev/latest/](https://docs.pydantic.dev/latest/)
 - **Alembic**: [https://alembic.sqlalchemy.org/en/latest/](https://alembic.sqlalchemy.org/en/latest/)
