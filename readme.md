@@ -22,3 +22,5 @@ Make sure you have the following prerequisites:
 
 ### Docs
 - **FastAPI**: [https://fastapi.tiangolo.com/](https://fastapi.tiangolo.com/)
+- **Pydantic**: [https://pydantic-docs.helpmanual.io/](https://pydantic-docs.helpmanual.io/)
+- **Alembic**: [https://alembic.sqlalchemy.org/en/latest/](https://alembic.sqlalchemy.org/en/latest/)
