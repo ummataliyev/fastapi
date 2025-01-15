@@ -1,3 +1,6 @@
+"""
+Mongo connection
+"""
 from motor import motor_asyncio
 
 from libs.environs import env
