@@ -29,7 +29,7 @@ markdown-it-py==3.0.0
 MarkupSafe==2.1.5
 marshmallow==3.23.2
 mdurl==0.1.2
-motor==3.6.0
+motor==3.4.0
 orjson==3.10.2
 packaging==24.2
 pip-chill==1.0.3
@@ -38,7 +38,7 @@ pycparser==2.22
 pydantic==2.7.1
 pydantic_core==2.18.2
 Pygments==2.17.2
-pymongo==4.9.0
+pymongo==4.8.0
 python-dateutil==2.9.0.post0
 python-dotenv==1.0.1
 python-multipart==0.0.9
