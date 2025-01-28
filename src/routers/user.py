@@ -17,7 +17,7 @@ from db.storage.postgres import get_db
 router = APIRouter()
 
 
-@router.get("/users/{id}", response_model=APIResponse)
+@router.get("/users/{id}")
 async def get_by_id(
     user_id: int,
     db: AsyncSession = Depends(get_db)
@@ -36,7 +36,7 @@ async def get_by_id(
     return response.get_user(user)
 
 
-@router.get("/users/", response_model=list[UserRead])
+@router.get("/users/")
 async def get_all(db: AsyncSession = Depends(get_db)):
     user_service = UserService(db)
     users = await user_service.get_all()
