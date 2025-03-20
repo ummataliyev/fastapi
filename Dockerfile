@@ -14,6 +14,8 @@ RUN pip install -r requirements.txt
 
 COPY . /app/
 
+RUN chmod +x /app/scripts/entrypoint.sh
+
 EXPOSE 8000
 
-CMD ["gunicorn", "main:app", "--workers", "1", "--worker-class", "uvicorn.workers.UvicornWorker", "--bind", "0.0.0.0:8000", "--timeout", "60"]
+ENTRYPOINT ["/app/scripts/entrypoint.sh"]

@@ -1,28 +1,23 @@
 """
 Initialize routers
 """
-from fastapi import Response
+from fastapi import Request
 from fastapi import APIRouter
-from fastapi.responses import PlainTextResponse
+from fastapi.templating import Jinja2Templates
 
 from src.routers import user
 
-
-home_router = APIRouter()
-
-
-@home_router.get(
-    path="/",
-    include_in_schema=False,
-    response_description="Homepage"
-)
-async def home() -> Response:
-    """
-    Default home page
-    """
-    return PlainTextResponse("Welcome to FastAPI!")
-
-
 routers = APIRouter()
+home_router = APIRouter()
+templates = Jinja2Templates(directory="templates")
 
-routers.include_router(user.router)
+
+@routers.get("/", response_description="Homepage", include_in_schema=False)
+async def home(request: Request):
+    return templates.TemplateResponse(
+        name="index.html",
+        context={"request": request, "github_username": "ummataliyev"}
+    )
+
+
+routers.include_router(user.router, prefix="/users", tags=["Users"])

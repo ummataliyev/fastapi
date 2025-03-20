@@ -1,89 +1,94 @@
 """
-User routes
+User routers
 """
 from fastapi import Depends
 from fastapi import APIRouter
 
-from sqlalchemy.ext.asyncio import AsyncSession
-
 from src.schemes.user import User
-from src.schemes.user import UserRead
 from src.services.user import UserService
 from src.response.user import UserResponse
-from src.abstract.scheme import APIResponse
-
-from db.storage.postgres import get_db
+from src.abstract.scheme import BaseScheme
 
 router = APIRouter()
+response = UserResponse()
 
 
-@router.get("/users/{id}", response_model=APIResponse)
+@router.get("/{id}", response_model=BaseScheme)
 async def get_by_id(
-    user_id: int,
-    db: AsyncSession = Depends(get_db)
+    id: int,
+    service: UserService = Depends(UserService.get_service)
 ):
-    response = UserResponse()
-
-    user_service = UserService(db)
+    """
+    Get a user by ID
+    """
     try:
-        user = await user_service.get_by_id(user_id)
-    except ValueError as e:
-        return response.get_error_response(str(e))
-
-    if user is None:
-        return response.user_not_found()
-
-    return response.get_user(user)
-
-
-@router.get("/users/", response_model=list[UserRead])
-async def get_all(db: AsyncSession = Depends(get_db)):
-    user_service = UserService(db)
-    users = await user_service.get_all()
-
-    return users
-
-
-@router.post("/users/", response_model=APIResponse)
-async def create_user(
-    user: User,
-    db: AsyncSession = Depends(get_db)
-):
-    response = UserResponse()
-    user_service = UserService(db)
-    new_user = await user_service.create(**user.dict())
-
-    return response.create(new_user)
-
-
-@router.patch("/users/{id}", response_model=APIResponse)
-async def update_user(
-    user_id: int,
-    user: User,
-    db: AsyncSession = Depends(get_db)
-):
-    response = UserResponse()
-    user_service = UserService(db)
-
-    try:
-        updated_user = await user_service.update(user_id, **user.dict())
+        user = await service.get_by_id(id)
+        return response.get_user(user)
     except ValueError:
         return response.user_not_found()
+    except Exception as e:
+        return response.get_error_response(f"An error occurred: {str(e)}")
 
-    return response.update(updated_user)
 
-
-@router.delete("/users/{id}", response_model=APIResponse)
-async def delete_user(
-    user_id: int,
-    db: AsyncSession = Depends(get_db)
+@router.get("/", response_model=BaseScheme)
+async def get_all(
+    service: UserService = Depends(UserService.get_service)
 ):
-    response = UserResponse()
-    user_service = UserService(db)
-
+    """
+    Get all users
+    """
     try:
-        result = await user_service.delete(user_id)
-    except ValueError as e:
-        return response.get_error_response(message=str(e))
+        users = await service.get_all()
+        return response.get_all(users)
+    except Exception as e:
+        return response.get_error_response(f"An error occurred: {str(e)}")
 
-    return response.delete(result["message"])
+
+@router.post("/", response_model=BaseScheme, status_code=201)
+async def create_user(
+    user: User,
+    service: UserService = Depends(UserService.get_service)
+):
+    """
+    Create a new user
+    """
+    try:
+        new_user = await service.create(**user.dict(exclude_unset=True))
+        return response.create(new_user)
+    except Exception as e:
+        return response.get_error_response(f"An error occurred: {str(e)}")
+
+
+@router.patch("/{id}", response_model=BaseScheme)
+async def update_user(
+    id: int,
+    user: User,
+    service: UserService = Depends(UserService.get_service)
+):
+    """
+    Update an existing user
+    """
+    try:
+        updated_user = await service.update(id, **user.dict(exclude_unset=True))
+        return response.update(updated_user)
+    except ValueError:
+        return response.user_not_found()
+    except Exception as e:
+        return response.get_error_response(f"An error occurred: {str(e)}")
+
+
+@router.delete("/{id}", response_model=BaseScheme)
+async def delete_user(
+    id: int,
+    service: UserService = Depends(UserService.get_service)
+):
+    """
+    Delete a user
+    """
+    try:
+        result = await service.delete(id)
+        return response.delete(result["message"])
+    except ValueError:
+        return response.user_not_found()
+    except Exception as e:
+        return response.get_error_response(f"An error occurred: {str(e)}")

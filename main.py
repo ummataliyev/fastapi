@@ -17,9 +17,9 @@ from db.storage.postgres import async_session
 
 
 app = FastAPI(
-    title="AsiaLine API",
-    description="AsiaLine API documentation",
-    version="1.0.42",
+    title="FastAPI",
+    description="API documentation",
+    version="1.0.1",
 )
 
 app.include_router(routers)

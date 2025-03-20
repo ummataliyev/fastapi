@@ -1,5 +1,5 @@
 """
-PostgreSQL connection
+MySQL connection
 """
 from urllib.parse import quote
 from sqlalchemy.ext.declarative import declarative_base
@@ -15,8 +15,7 @@ DB_HOST = env.str('DB_HOST')
 DB_PORT = env.int('DB_PORT')
 DB_PASSWORD = quote(env.str('DB_PASSWORD'))
 
-DB_URL = f"postgresql+asyncpg://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
-
+DB_URL = f"mysql+aiomysql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
 
 engine = create_async_engine(
     url=DB_URL,

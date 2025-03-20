@@ -5,15 +5,12 @@ import redis
 
 from libs.environs import env
 
+REDIS_IS_ENABLE = env.bool("REDIS_IS_ENABLE", default=False)
 
-REDIS_DB = env.str('REDIS_DB')
-REDIS_HOST = env.str('REDIS_HOST')
-REDIS_PORT = env.int('REDIS_PORT')
-REDIS_PASSWORD = env.str('REDIS_PASSWORD')
-
-redis_client = redis.Redis(
-    host=REDIS_HOST,
-    port=REDIS_PORT,
-    password=REDIS_PASSWORD,
-    db=REDIS_DB
-)
+if REDIS_IS_ENABLE:
+    redis_client = redis.Redis(
+        db=env.str('REDIS_DB'),
+        host=env.str('REDIS_HOST'),
+        port=env.int('REDIS_PORT'),
+        password=env.str('REDIS_PASSWORD')
+    )

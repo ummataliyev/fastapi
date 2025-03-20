@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Welcome</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin-top: 50px;
+        }
+        .github-link {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            text-decoration: none;
+            font-size: 18px;
+            font-weight: bold;
+            color: #333;
+        }
+        .github-link img {
+            width: 24px;
+            height: 24px;
+        }
+    </style>
+</head>
+<body>
+    <h2>Welcome to FastAPI!</h2>
+    <p>
+        <a class="github-link" href="https://github.com/{{ github_username }}" target="_blank">
+            <img src="https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png" alt="GitHub Logo">
+            {{ github_username }}
+        </a>
+    </p>
+</body>
+</html>
