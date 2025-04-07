@@ -5,7 +5,7 @@ from sqlalchemy.ext.asyncio import create_async_engine
 from sqlalchemy import pool
 from alembic import context
 
-from db.storage.switcher import Base, DB_URL
+from db.storage.postgres import Base, db_url
 from src import models  # noqa
 
 sys.path = ['.', '..'] + sys.path[1:]
@@ -23,7 +23,7 @@ target_metadata = Base.metadata
 
 def run_migrations_offline() -> None:
     """Run migrations in 'offline' mode."""
-    url = config.get_main_option("sqlalchemy.url") or DB_URL
+    url = config.get_main_option("sqlalchemy.url") or db_url
     context.configure(
         url=url,
         target_metadata=target_metadata,
@@ -50,7 +50,7 @@ def do_run_migrations(connection):
 
 async def run_async_migrations():
     """Run migrations asynchronously with an engine."""
-    connectable = create_async_engine(DB_URL, poolclass=pool.NullPool)
+    connectable = create_async_engine(db_url, poolclass=pool.NullPool)
 
     async with connectable.begin() as connection:
         await connection.run_sync(do_run_migrations)

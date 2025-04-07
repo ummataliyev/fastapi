@@ -1,13 +1,24 @@
+version: '3.8'
+
 services:
   fastapi:
     build: .
-    container_name: app
+    container_name: ${SERVICE_NAME}
     ports:
       - "8000:8000"
     depends_on:
-      - ${DB_TYPE}
-    env_file:
-      - .env
+      - postgres
+      - redis
+      - mongo
+    environment:
+      - DB_USER=${DB_USER}
+      - DB_NAME=${DB_NAME}
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_PASSWORD=${DB_PASSWORD}
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - MONGODB_URL=${MONGODB_URL}
     networks:
       - app-network
 
@@ -15,60 +26,28 @@ services:
     image: postgres:15.2
     container_name: postgres-db
     environment:
-      POSTGRES_USER: ${DB_USER}
-      POSTGRES_PASSWORD: ${DB_PASSWORD}
-      POSTGRES_DB: ${DB_NAME}
+      - POSTGRES_USER=${DB_USER}
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+      - POSTGRES_DB=${DB_NAME}
     volumes:
       - postgres_data:/var/lib/postgresql/data
     networks:
       - app-network
-    deploy:
-      replicas: 1
-      placement:
-        constraints:
-          - node.role == manager
-
-  mysql:
-    image: mysql:8.0
-    container_name: mysql-db
-    environment:
-      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
-      MYSQL_DATABASE: ${DB_NAME}
-      MYSQL_USER: ${DB_USER}
-      MYSQL_PASSWORD: ${DB_PASSWORD}
-    ports:
-      - "3306:3306"
-    volumes:
-      - mysql_data:/var/lib/mysql
-    networks:
-      - app-network
-    deploy:
-      replicas: 0
-
-  mongo:
-    image: mongo:latest
-    container_name: mongo-db
-    environment:
-      MONGO_INITDB_DATABASE: ${MONGO_DB_NAME}
-    networks:
-      - app-network
-    deploy:
-      replicas: 0
 
   redis:
     image: redis:6.2
     container_name: redis
-    environment:
-      REDIS_PASSWORD: ${REDIS_PASSWORD}
     networks:
       - app-network
-    deploy:
-      replicas: 0
+
+  mongo:
+    image: mongo:latest
+    container_name: mongo-db
+    networks:
+      - app-network
 
 volumes:
   postgres_data:
-    driver: local
-  mysql_data:
     driver: local
 
 networks:

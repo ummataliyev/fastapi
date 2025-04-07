@@ -5,7 +5,7 @@ from sqlalchemy import Column
 from sqlalchemy import String
 from sqlalchemy import Integer
 
-from db.storage.switcher import Base
+from db.storage.postgres import Base
 
 
 class User(Base):
