@@ -9,7 +9,6 @@ services:
     depends_on:
       - postgres
       - redis
-      - mongo
     environment:
       - DB_USER=${DB_USER}
       - DB_NAME=${DB_NAME}
@@ -18,7 +17,6 @@ services:
       - DB_PASSWORD=${DB_PASSWORD}
       - REDIS_HOST=redis
       - REDIS_PORT=6379
-      - MONGODB_URL=${MONGODB_URL}
     networks:
       - app-network
 
@@ -37,12 +35,6 @@ services:
   redis:
     image: redis:6.2
     container_name: redis
-    networks:
-      - app-network
-
-  mongo:
-    image: mongo:latest
-    container_name: mongo-db
     networks:
       - app-network
 

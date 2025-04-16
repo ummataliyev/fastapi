@@ -2,8 +2,8 @@ from motor import motor_asyncio
 
 from libs.environs import env
 
-MONGODB_URL = env.str('MONGODB_URL')
-MONGO_ENABLED = env.bool("MONGO_ENABLED", default=False)
+MONGO_IS_ENABLED = env.bool("MONGO_IS_ENABLED", default=False)
+MONGODB_URL = env.str('MONGODB_URL', default='mongodb://localhost:27017')
 
 
 class MongoDB:
@@ -24,5 +24,5 @@ class MongoDB:
         self.__client.close()
 
 
-if MONGO_ENABLED:
+if MONGO_IS_ENABLED:
     mongo_client = MongoDB(MONGODB_URL)
