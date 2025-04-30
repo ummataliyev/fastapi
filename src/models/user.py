@@ -1,18 +1,15 @@
 """
 User table
 """
-from sqlalchemy import Column
-from sqlalchemy import String
-from sqlalchemy import Integer
+from sqlalchemy.orm import Mapped
+from sqlalchemy.orm import mapped_column
 
 from db.storage.postgres import Base
+from db.storage.postgres import IntIdPkMixin
 
 
-class User(Base):
-    __tablename__ = "users"
-
-    id = Column(Integer, primary_key=True, index=True, autoincrement=True)
-    name = Column(String, index=True)
+class User(Base, IntIdPkMixin):
+    name: Mapped[str] = mapped_column(index=True)
 
     def __repr__(self):
         return f"<Item id={self.id} name={self.name}>"
