@@ -2,11 +2,12 @@
 Database connection
 """
 import re
+
 from urllib.parse import quote
 
-from sqlalchemy.orm import DeclarativeBase
-from sqlalchemy.orm import declared_attr
 from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm import declared_attr
+from sqlalchemy.orm import DeclarativeBase
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.ext.asyncio import create_async_engine
 

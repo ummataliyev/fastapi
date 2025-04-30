@@ -1,7 +1,8 @@
 """
 User table
 """
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped
+from sqlalchemy.orm import mapped_column
 
 from db.storage.postgres import Base
 from db.storage.postgres import IntIdPkMixin
