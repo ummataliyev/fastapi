@@ -1,9 +1,7 @@
 """
 User routers
 """
-from fastapi import Depends
-from fastapi import APIRouter
-
+from fastapi import Depends, APIRouter
 from src.schemes.user import User
 from src.services.user import UserService
 from src.response.user import UserResponse
