@@ -8,7 +8,7 @@ from sqlalchemy.future import select
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.abstract.interface import IRepository
+from src.interfaces.interface import IRepository
 
 T = TypeVar("T")
 

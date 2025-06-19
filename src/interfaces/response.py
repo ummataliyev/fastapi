@@ -6,7 +6,7 @@ from typing import Type
 from typing import Generic
 from typing import TypeVar
 
-from src.abstract.scheme import BaseScheme
+from src.interfaces.scheme import BaseScheme
 
 T = TypeVar('T')
 

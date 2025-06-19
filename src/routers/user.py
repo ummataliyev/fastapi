@@ -4,10 +4,10 @@ User routers
 from fastapi import Depends
 from fastapi import APIRouter
 
-from src.schemes.user import User
+from src.schemas.user import User
 from src.services.user import UserService
 from src.response.user import UserResponse
-from src.abstract.scheme import BaseScheme
+from src.interfaces.scheme import BaseScheme
 
 router = APIRouter()
 response = UserResponse()
