@@ -4,7 +4,7 @@ User repository
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.models.user import User
-from src.abstract.repository import BaseRepository
+from src.interfaces.repository import BaseRepository
 
 
 class UserRepository(BaseRepository):

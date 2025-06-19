@@ -2,9 +2,9 @@
 User response
 """
 from src.models.user import User
-from src.schemes.user import UserRead
-from src.abstract.response import BaseResponse
-from src.abstract.scheme import BaseScheme
+from src.schemas.user import UserRead
+from src.interfaces.response import BaseResponse
+from src.interfaces.scheme import BaseScheme
 
 
 class UserResponse(BaseResponse[User]):

@@ -9,7 +9,7 @@ from typing import TypeVar
 from typing import Generic
 
 from sqlalchemy.ext.asyncio import AsyncSession
-from src.abstract.repository import BaseRepository
+from src.interfaces.repository import BaseRepository
 
 from db.storage.postgres import get_db
 
