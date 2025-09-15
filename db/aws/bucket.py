@@ -1,6 +1,7 @@
 """
 AWS connection
 """
+
 import boto3
 
 from libs.environs import env
