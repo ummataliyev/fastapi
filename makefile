@@ -1,7 +1,9 @@
-.PHONY: help build up down logs restart migrate clean disable-postgres disable-mysql disable-mongo
+.PHONY: help build up down logs restart revision upgrade clean disable-postgres disable-mysql disable-mongo
 
 include .env
 export $(shell sed 's/=.*//' .env)
+
+DOCKER_COMPOSE_FILE=docker/docker-compose.yml
 
 help:
 	@echo "Available commands:"
@@ -10,7 +12,8 @@ help:
 	@echo "  make down              - Stop and remove containers"
 	@echo "  make logs              - View logs"
 	@echo "  make restart           - Restart FastAPI"
-	@echo "  make migrate           - Run Alembic migrations"
+	@echo "  make revision          - Create Alembic migration revision"
+	@echo "  make upgrade           - Apply Alembic migrations"
 	@echo "  make clean             - Remove volumes and stop everything"
 	@echo "  make disable-postgres  - Stop and remove PostgreSQL container"
 	@echo "  make disable-mysql     - Stop and remove MySQL container"
@@ -18,30 +21,30 @@ help:
 
 build:
 	@echo "🔨 Building FastAPI Docker image..."
-	docker compose build --no-cache
+	docker compose -f $(DOCKER_COMPOSE_FILE) build --no-cache
 
 up:
 	@echo "🚀 Starting FastAPI with ${DB_TYPE}..."
-	DB_TYPE=${DB_TYPE} docker compose up -d --build
+	DB_TYPE=${DB_TYPE} docker compose -f $(DOCKER_COMPOSE_FILE) up -d --build
 
 down:
 	@echo "🛑 Stopping and removing all containers..."
-	docker compose down
+	docker compose -f $(DOCKER_COMPOSE_FILE) down
 
 logs:
 	@echo "📜 Viewing logs..."
-	docker compose logs -f
+	docker compose -f $(DOCKER_COMPOSE_FILE) logs -f
 
 restart: down up
 	@echo "🔄 Restarted FastAPI service!"
 
 revision:
 	@read -p "Enter revision message: " msg; \
-	docker compose exec fastapi alembic revision --autogenerate -m "$$msg"
+	docker compose -f $(DOCKER_COMPOSE_FILE) exec fastapi alembic revision --autogenerate -m "$$msg"
 
 upgrade:
 	@echo "📦 Upgrading database to latest revision..."
-	docker compose exec fastapi alembic upgrade head
+	docker compose -f $(DOCKER_COMPOSE_FILE) exec fastapi alembic upgrade head
 
 clean: down
 	@echo "🧹 Cleaning up volumes..."
@@ -49,15 +52,15 @@ clean: down
 
 disable-postgres:
 	@echo "🛑 Disabling PostgreSQL..."
-	docker compose stop postgres
-	docker compose rm -f postgres
+	docker compose -f $(DOCKER_COMPOSE_FILE) stop postgres
+	docker compose -f $(DOCKER_COMPOSE_FILE) rm -f postgres
 
 disable-mysql:
 	@echo "🛑 Disabling MySQL..."
-	docker compose stop mysql
-	docker compose rm -f mysql
+	docker compose -f $(DOCKER_COMPOSE_FILE) stop mysql
+	docker compose -f $(DOCKER_COMPOSE_FILE) rm -f mysql
 
 disable-mongo:
 	@echo "🛑 Disabling Mongo..."
-	docker compose stop mongo
-	docker compose rm -f mongo
+	docker compose -f $(DOCKER_COMPOSE_FILE) stop mongo
+	docker compose -f $(DOCKER_COMPOSE_FILE) rm -f mongo

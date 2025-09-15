@@ -1,11 +1,15 @@
 import sys
+import os
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../../..')))
+from db.storage.postgres.connection import Base, db_url
+
 import asyncio
 from logging.config import fileConfig
 from sqlalchemy.ext.asyncio import async_engine_from_config
 from sqlalchemy import pool
 from alembic import context
 
-from db.storage.postgres import Base, db_url
+from db.storage.postgres.connection import Base, db_url
 from src import models  # noqa
 
 sys.path = ['.', '..'] + sys.path[1:]
