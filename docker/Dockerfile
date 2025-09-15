@@ -15,7 +15,6 @@ COPY alembic.ini /app/
 COPY db /app/db
 COPY libs /app/libs
 COPY src /app/src
-COPY main.py /app/
 COPY scripts /app/scripts
 
 RUN chmod +x /app/scripts/entrypoint.sh
