@@ -10,19 +10,18 @@ from src import models  # noqa
 
 sys.path = ['.', '..'] + sys.path[1:]
 
-# Alembic Config object
 config = context.config
 
-# Set up logging if config file exists
 if config.config_file_name is not None:
     fileConfig(config.config_file_name)
 
-# Set target metadata for 'autogenerate'
 target_metadata = Base.metadata
 
 
 def run_migrations_offline() -> None:
-    """Run migrations in 'offline' mode."""
+    """
+    Run migrations in 'offline' mode.
+    """
     url = config.get_main_option("sqlalchemy.url") or db_url
     context.configure(
         url=url,
@@ -37,7 +36,9 @@ def run_migrations_offline() -> None:
 
 
 def do_run_migrations(connection):
-    """Run actual migrations using the provided connection."""
+    """
+    Run actual migrations using the provided connection.
+    """
     context.configure(
         connection=connection,
         target_metadata=target_metadata,
@@ -49,7 +50,9 @@ def do_run_migrations(connection):
 
 
 async def run_async_migrations():
-    """Run migrations asynchronously with an engine."""
+    """
+    Run migrations asynchronously with an engine.
+    """
     configuration = config.get_section(config.config_ini_section)
     configuration["sqlalchemy.url"] = db_url
     connectable = async_engine_from_config(
@@ -69,7 +72,6 @@ def run_migrations_online() -> None:
     asyncio.run(run_async_migrations())
 
 
-# Run migrations based on mode
 if context.is_offline_mode():
     run_migrations_offline()
 else:
