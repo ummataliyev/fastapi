@@ -1,10 +1,12 @@
 #!/bin/sh
-set -e  
+set -e
 
 echo "⏳ Waiting for database..."
 sleep 5
 
 echo "📦 Running migrations..."
+cd /app
+export PYTHONPATH=/app
 alembic upgrade head
 
 echo "🚀 Starting FastAPI app..."

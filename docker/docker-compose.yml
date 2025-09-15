@@ -2,7 +2,9 @@ version: '3.8'
 
 services:
   fastapi:
-    build: .
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
     container_name: ${SERVICE_NAME}
     ports:
       - "8000:8000"
@@ -10,7 +12,7 @@ services:
       - postgres
       - redis
     env_file:
-      - .env
+      - ../.env
     environment:
       - DB_USER=${DB_USER}
       - DB_NAME=${DB_NAME}
@@ -19,11 +21,15 @@ services:
       - DB_PASSWORD=${DB_PASSWORD}
       - REDIS_HOST=redis
       - REDIS_PORT=6379
+      - PYTHONPATH=/app
+    volumes:
+      - ../src/migrations:/app/src/migrations
     networks:
       - app-network
+    restart: always
 
   postgres:
-    image: postgres:15.2
+    image: postgres:17.5
     container_name: ${SERVICE_DB_NAME}
     environment:
       - POSTGRES_USER=${DB_USER}
@@ -33,12 +39,14 @@ services:
       - postgres_data:/var/lib/postgresql/data
     networks:
       - app-network
+    restart: always
 
   redis:
-    image: redis:6.2
+    image: redis:latest
     container_name: redis
     networks:
       - app-network
+    restart: always
 
 volumes:
   postgres_data:
