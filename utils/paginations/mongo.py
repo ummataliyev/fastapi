@@ -1,3 +1,7 @@
+"""
+Mongo DB pagination
+"""
+
 import bson
 
 from typing import Any

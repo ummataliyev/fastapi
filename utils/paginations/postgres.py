@@ -1,3 +1,7 @@
+"""
+PostgreSQL pagination
+"""
+
 from typing import Any
 from typing import Optional
 

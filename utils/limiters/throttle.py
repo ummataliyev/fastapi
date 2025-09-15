@@ -1,3 +1,7 @@
+"""
+Request Limiter configurations
+"""
+
 import os
 import time
 

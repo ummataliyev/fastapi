@@ -1,5 +1,5 @@
 """
-User routers
+User Routers
 """
 
 from fastapi import status
@@ -19,13 +19,20 @@ response = UserResponse()
 
 
 @router.get(
-        path="/{id}",
-        response_model=BaseScheme
+    path="/{id}",
+    response_model=BaseScheme
 )
 async def get_user_by_id(
     id: int,
     service: UserService = Depends(UserService.get_service)
 ):
+    """
+    Retrieve a single user by ID.
+
+    :param id: ID of the user to retrieve.
+    :param service: UserService instance injected by FastAPI Depends.
+    :return: Standardized BaseScheme response containing the user or error.
+    """
     try:
         user = await service.get_by_id(id)
         return response.get_user(user)
@@ -36,12 +43,18 @@ async def get_user_by_id(
 
 
 @router.get(
-        path="/",
-        response_model=BaseScheme
+    path="/",
+    response_model=BaseScheme
 )
 async def get_all_users(
     service: UserService = Depends(UserService.get_service)
 ):
+    """
+    Retrieve all users.
+
+    :param service: UserService instance injected by FastAPI Depends.
+    :return: Standardized BaseScheme response containing list of users or error.
+    """
     try:
         users = await service.get_all()
         return response.get_all(users)
@@ -50,14 +63,21 @@ async def get_all_users(
 
 
 @router.post(
-        path="/",
-        response_model=BaseScheme,
-        status_code=status.HTTP_201_CREATED
+    path="/",
+    response_model=BaseScheme,
+    status_code=status.HTTP_201_CREATED
 )
 async def create_user(
     user_in: UserCreate,
     service: UserService = Depends(UserService.get_service)
 ):
+    """
+    Create a new user.
+
+    :param user_in: UserCreate schema containing input data.
+    :param service: UserService instance injected by FastAPI Depends.
+    :return: Standardized BaseScheme response with the created user or error.
+    """
     try:
         new_user = await service.create(**user_in.model_dump())
         return response.create(new_user)
@@ -66,14 +86,22 @@ async def create_user(
 
 
 @router.patch(
-        path="/{id}",
-        response_model=BaseScheme
+    path="/{id}",
+    response_model=BaseScheme
 )
 async def update_user(
     id: int,
     user_in: UserUpdate,
     service: UserService = Depends(UserService.get_service)
 ):
+    """
+    Update an existing user by ID.
+
+    :param id: ID of the user to update.
+    :param user_in: UserUpdate schema containing fields to update.
+    :param service: UserService instance injected by FastAPI Depends.
+    :return: Standardized BaseScheme response with updated user or error.
+    """
     try:
         updated_user = await service.update(
             id,
@@ -87,13 +115,20 @@ async def update_user(
 
 
 @router.delete(
-        path="/{id}",
-        response_model=BaseScheme
+    path="/{id}",
+    response_model=BaseScheme
 )
 async def delete_user(
     id: int,
     service: UserService = Depends(UserService.get_service)
 ):
+    """
+    Delete a user by ID.
+
+    :param id: ID of the user to delete.
+    :param service: UserService instance injected by FastAPI Depends.
+    :return: Standardized BaseScheme response confirming deletion or error.
+    """
     try:
         await service.delete(id)
         return response.delete()

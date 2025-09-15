@@ -20,13 +20,31 @@ T = TypeVar("T")
 
 
 class BaseRepository(IRepository[T], Generic[T]):
+    """
+    Base repository implementation of IRepository interface for async SQLAlchemy operations.
+
+    Provides generic CRUD operations and common query methods for any SQLAlchemy model.
+    Designed to be inherited by concrete repositories for specific entity types.
+    """
+
     def __init__(self, db_session: AsyncSession, model: Type[T]):
+        """
+        Initialize the repository with an async database session and model.
+
+        :param db_session: Async SQLAlchemy session for database access.
+        :param model: SQLAlchemy model class representing the entity.
+        """
         self.db_session = db_session
         self.model = model
 
     async def create(self, obj_in: Any, **kwargs: Any) -> T:
         """
-        Create a new record
+        Create a new record in the database.
+
+        :param obj_in: Input data as dict or model instance.
+        :param kwargs: Additional keyword arguments to pass to the model constructor.
+        :return: The created and persisted model instance.
+        :raises SQLAlchemyError: If database operation fails.
         """
         try:
             data = obj_in if isinstance(obj_in, dict) else obj_in.__dict__
@@ -41,17 +59,17 @@ class BaseRepository(IRepository[T], Generic[T]):
 
     async def update(self, obj_current: T, obj_in: Any) -> T:
         """
-        Update an existing record
+        Update an existing record in the database.
+
+        :param obj_current: Existing model instance to update.
+        :param obj_in: Input data as dict or model instance containing new values.
+        :return: The updated model instance.
+        :raises SQLAlchemyError: If database operation fails.
         """
         try:
-            if isinstance(obj_in, dict):
-                update_data = obj_in
-            else:
-                update_data = obj_in.__dict__
-
+            update_data = obj_in if isinstance(obj_in, dict) else obj_in.__dict__
             for key, value in update_data.items():
                 setattr(obj_current, key, value)
-
             self.db_session.add(obj_current)
             await self.db_session.commit()
             await self.db_session.refresh(obj_current)
@@ -62,7 +80,11 @@ class BaseRepository(IRepository[T], Generic[T]):
 
     async def get(self, **kwargs: Any) -> Optional[T]:
         """
-        Get one record by filter
+        Retrieve a single record matching the filter criteria.
+
+        :param kwargs: Filtering criteria as key-value pairs.
+        :return: Model instance if found, else None.
+        :raises SQLAlchemyError: If database operation fails.
         """
         try:
             result = await self.db_session.execute(
@@ -74,7 +96,11 @@ class BaseRepository(IRepository[T], Generic[T]):
 
     async def delete(self, **kwargs: Any) -> None:
         """
-        Delete one record by filter
+        Delete a single record matching the filter criteria.
+
+        :param kwargs: Filtering criteria as key-value pairs.
+        :raises ValueError: If no record is found to delete.
+        :raises SQLAlchemyError: If database operation fails.
         """
         try:
             record = await self.get(**kwargs)
@@ -93,7 +119,13 @@ class BaseRepository(IRepository[T], Generic[T]):
         order_by: Optional[str] = None,
     ) -> List[T]:
         """
-        Get all records with pagination and optional sorting
+        Retrieve all records with pagination and optional sorting.
+
+        :param skip: Number of records to skip.
+        :param limit: Maximum number of records to return.
+        :param order_by: Optional sorting string, e.g., 'field_name asc' or 'field_name desc'.
+        :return: List of model instances.
+        :raises SQLAlchemyError: If database operation fails.
         """
         try:
             query = select(self.model).offset(skip).limit(limit)
@@ -112,7 +144,11 @@ class BaseRepository(IRepository[T], Generic[T]):
 
     async def filter(self, **kwargs: Any) -> List[T]:
         """
-        Filter records by criteria
+        Retrieve records matching specific filter criteria.
+
+        :param kwargs: Filtering criteria as key-value pairs.
+        :return: List of matching model instances.
+        :raises SQLAlchemyError: If database operation fails.
         """
         try:
             result = await self.db_session.execute(
@@ -124,7 +160,11 @@ class BaseRepository(IRepository[T], Generic[T]):
 
     async def get_or_create(self, obj_in: Any, **kwargs: Any) -> T:
         """
-        Get a record if exists, otherwise create it
+        Retrieve a record if it exists; otherwise, create a new one.
+
+        :param obj_in: Input data to create if record does not exist.
+        :param kwargs: Filtering criteria to check existence.
+        :return: Existing or newly created model instance.
         """
         record = await self.get(**kwargs)
         if record:
@@ -133,14 +173,21 @@ class BaseRepository(IRepository[T], Generic[T]):
 
     async def exists(self, **kwargs: Any) -> bool:
         """
-        Check if a record exists
+        Check if a record exists in the database.
+
+        :param kwargs: Filtering criteria as key-value pairs.
+        :return: True if a matching record exists, False otherwise.
         """
         record = await self.get(**kwargs)
         return record is not None
 
     async def count(self, **kwargs: Any) -> int:
         """
-        Count records matching filter criteria
+        Count the number of records matching specific filter criteria.
+
+        :param kwargs: Filtering criteria as key-value pairs.
+        :return: Number of matching records.
+        :raises SQLAlchemyError: If database operation fails.
         """
         query = select(self.model).filter_by(**kwargs)
         result = await self.db_session.execute(query)
