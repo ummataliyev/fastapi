@@ -12,9 +12,15 @@ from db.storage.postgres.mixins import SoftDeletionMixin
 
 
 class User(Base, IntIdPkMixin, TimestampMixin, SoftDeletionMixin):
+    """
+    SQLAlchemy model representing a user.
+    """
     __tablename__ = "users"
 
     name: Mapped[str] = mapped_column(index=True)
 
-    def __repr__(self):
+    def __repr__(self) -> str:
+        """
+        Return a readable string representation of the User instance.
+        """
         return f"<User id={self.id} name={self.name}>"
