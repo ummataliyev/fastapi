@@ -35,8 +35,12 @@ logs:
 restart: down up
 	@echo "🔄 Restarted FastAPI service!"
 
-migrate:
-	@echo "📦 Running database migrations..."
+revision:
+	@read -p "Enter revision message: " msg; \
+	docker compose exec fastapi alembic revision --autogenerate -m "$$msg"
+
+upgrade:
+	@echo "📦 Upgrading database to latest revision..."
 	docker compose exec fastapi alembic upgrade head
 
 clean: down
