@@ -1,6 +1,7 @@
 """
 Main file for running the application
 """
+
 from fastapi import FastAPI
 from fastapi.exceptions import HTTPException
 from fastapi.responses import PlainTextResponse
