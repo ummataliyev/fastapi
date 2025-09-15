@@ -1,12 +1,13 @@
 """
 Base service class for interacting with repositories
 """
-from fastapi import Depends
 
 from typing import List
 from typing import Type
 from typing import TypeVar
 from typing import Generic
+
+from fastapi import Depends
 
 from sqlalchemy.ext.asyncio import AsyncSession
 from src.interfaces.repository import BaseRepository
@@ -21,7 +22,7 @@ class BaseService(Generic[T]):
         """
         Initialize the BaseService with a database session and model
         """
-        self.repository = BaseRepository(db_session, model)
+        self.repository = BaseRepository[T](db_session, model)
 
     async def get_by_id(self, record_id: int) -> T:
         """
@@ -32,11 +33,13 @@ class BaseService(Generic[T]):
             raise ValueError(f"{self.repository.model.__name__} with id {record_id} not found")
         return record
 
-    async def get_all(self) -> List[T]:
+    async def get_all(
+        self, skip: int = 0, limit: int = 50, order_by: str = None
+    ) -> List[T]:
         """
-        Get all records with default pagination
+        Get all records with optional pagination and sorting
         """
-        return await self.repository.all()
+        return await self.repository.all(skip=skip, limit=limit, order_by=order_by)
 
     async def create(self, **kwargs) -> T:
         """
@@ -58,19 +61,37 @@ class BaseService(Generic[T]):
         await self.repository.delete(id=record_id)
         return {"message": f"{self.repository.model.__name__} with id {record_id} deleted successfully"}
 
+    async def get_or_create(self, **kwargs) -> T:
+        """
+        Get a record if exists, otherwise create it
+        """
+        return await self.repository.get_or_create(obj_in=kwargs, **kwargs)
+
+    async def exists(self, **kwargs) -> bool:
+        """
+        Check if a record exists
+        """
+        return await self.repository.exists(**kwargs)
+
+    async def count(self, **kwargs) -> int:
+        """
+        Count records matching filter criteria
+        """
+        return await self.repository.count(**kwargs)
+
     @classmethod
     def get_service(cls, db: AsyncSession = Depends(get_db)) -> "BaseService":
         """
-        Creates a service instance for dependency
+        Dependency injection helper to instantiate the service with the correct model
         """
+        # Extract the model type from the generic
         if not hasattr(cls, "__orig_bases__") or not cls.__orig_bases__:
             raise TypeError(f"{cls.__name__} must explicitly define a generic type (e.g., BaseService[User])")
 
         base = cls.__orig_bases__[0]
-
         if hasattr(base, "__args__") and base.__args__:
             model = base.__args__[0]
         else:
             raise TypeError(f"Could not determine model for {cls.__name__}")
 
-        return cls(db)  # ✅ Pass only db (not model)
+        return cls(db, model)

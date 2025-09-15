@@ -1,71 +1,88 @@
 """
 Dynamic databae abstraction
 """
-from typing import Any
+
 from typing import List
+from typing import TypeVar
 from typing import Optional
+from typing import Generic
 
-
-from abc import ABCMeta
+from abc import ABC
 from abc import abstractmethod
 
 
-class IRepository(metaclass=ABCMeta):
+T = TypeVar("T")
+
+
+class IRepository(Generic[T], ABC):
     """
-    Class representing the repository interface for data access operations
+    Generic repository interface for async data access operations.
     """
 
     @abstractmethod
-    async def create(self, obj_in: Any, **kwargs: Any) -> Any:
+    async def create(self, obj_in: T, **kwargs) -> T:
         """
-        Create a new entity and return the saved instance
+        Create a new entity and return the saved instance.
         """
-        raise NotImplementedError
+        ...
 
     @abstractmethod
-    async def update(self, obj_current: Any, obj_in: Any) -> Any:
+    async def update(self, obj_current: T, obj_in: T) -> T:
         """
-        Update an existing entity and return the saved instance
+        Update an existing entity and return the updated instance.
         """
-        raise NotImplementedError
+        ...
 
     @abstractmethod
-    async def get(self, **kwargs: Any) -> Optional[Any]:
+    async def get(self, **kwargs) -> Optional[T]:
         """
-        Retrieve one entity instance based on filter criteria
+        Retrieve one entity instance based on filter criteria.
         """
-        raise NotImplementedError
+        ...
 
     @abstractmethod
-    async def delete(self, **kwargs: Any) -> None:
+    async def delete(self, **kwargs) -> None:
         """
-        Delete one entity instance based on filter criteria
+        Delete one entity instance based on filter criteria.
         """
-        raise NotImplementedError
+        ...
 
     @abstractmethod
     async def all(
         self,
         skip: int = 0,
         limit: int = 50,
-        sort_field: Optional[str] = None,
-        sort_order: Optional[str] = None,
-    ) -> List[Any]:
+        order_by: Optional[str] = None,
+    ) -> List[T]:
         """
-        Retrieve all entity instances with pagination and sorting options
+        Retrieve all entity instances with pagination and optional sorting.
         """
-        raise NotImplementedError
+        ...
 
     @abstractmethod
-    async def f(self, **kwargs: Any) -> List[Any]:
+    async def filter(self, **kwargs) -> List[T]:
         """
-        Filter and retrieve a list of entity instances based on criteria
+        Filter and retrieve a list of entity instances based on criteria.
         """
-        raise NotImplementedError
+        ...
 
     @abstractmethod
-    async def get_or_create(self, obj_in: Any, **kwargs: Any) -> Any:
+    async def get_or_create(self, obj_in: T, **kwargs) -> T:
         """
-        Retrieve an entity if it exists, or create it if it doesn't
+        Retrieve an entity if it exists, or create it if it doesn't.
         """
-        raise NotImplementedError
+        ...
+
+    @abstractmethod
+    async def exists(self, **kwargs) -> bool:
+        """
+        Check if an entity exists based on filter criteria.
+        """
+        ...
+
+    @abstractmethod
+    async def count(self, **kwargs) -> int:
+        """
+        Count entities based on filter criteria.
+        """
+        ...

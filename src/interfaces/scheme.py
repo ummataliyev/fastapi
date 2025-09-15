@@ -1,12 +1,17 @@
 """
 Base class for routers response scheme
 """
-from typing import Any
+
+from typing import TypeVar
+from typing import Generic
 
 from pydantic import BaseModel
 
 
-class BaseScheme(BaseModel):
+T = TypeVar("T")
+
+
+class BaseScheme(BaseModel, Generic[T]):
     status: str
     message: str
-    data: Any
+    data: T | None = None

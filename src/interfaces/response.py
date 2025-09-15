@@ -1,14 +1,17 @@
 """
 Base class for routers response
 """
+
 from typing import List
 from typing import Type
+from typing import Union
 from typing import Generic
 from typing import TypeVar
 
 from src.interfaces.scheme import BaseScheme
 
-T = TypeVar('T')
+
+T = TypeVar("T")
 
 
 class BaseResponse(Generic[T]):
@@ -17,68 +20,84 @@ class BaseResponse(Generic[T]):
 
     def to_dict(self, record: T) -> dict:
         """
-        Convert model to dictionary for API response
+        Convert model instance to dictionary for API response
         """
-        if hasattr(record, "dict"):
+        if hasattr(record, "dict") and callable(record.dict):
             return record.dict()
         return record.__dict__
 
-    def get_success_response(self, record: T, message: str = None) -> BaseScheme:
+    def _build_response(
+        self,
+        status: str,
+        message: str,
+        data: Union[dict, List[dict], None] = None
+    ) -> BaseScheme:
         """
-        Standard success response for GET, POST, PATCH
+        Internal helper to standardize response building
         """
         return BaseScheme(
-            status="success",
-            message=message or f"{self.model.__name__} fetched successfully",
-            data=self.to_dict(record)
+            status=status,
+            message=message,
+            data=data
         )
 
-    def get_error_response(self, message: str = None) -> BaseScheme:
+    def success(
+        self,
+        record: Union[T, List[T], None] = None,
+        message: str = None,
+        action: str = None
+    ) -> BaseScheme:
         """
-        Standard error response with message and data fields
+        Generic success response
         """
-        return BaseScheme(
+        msg = message or self._default_message(record, action)
+        if isinstance(record, list):
+            data = [self.to_dict(r) for r in record]
+        elif record is not None:
+            data = self.to_dict(record)
+        else:
+            data = None
+        return self._build_response("success", msg, data)
+
+    def error(self, message: str = None) -> BaseScheme:
+        """
+        Standard error response
+        """
+        return self._build_response(
             status="error",
             message=message or "An unexpected error occurred",
             data=None
         )
 
-    def get_delete_success_response(self) -> BaseScheme:
+    def _default_message(self, record: Union[T, List[T], None], action: str) -> str:
         """
-        Success response for DELETE
+        Generate default messages based on action and record
         """
-        return BaseScheme(
-            status="success",
-            message=f"{self.model.__name__} deleted successfully",
-            data=None
-        )
+        name = self.model.__name__
+        if action == "create":
+            return f"{name} created successfully"
+        elif action == "update":
+            return f"{name} updated successfully"
+        elif action == "delete":
+            return f"{name} deleted successfully"
+        elif isinstance(record, list):
+            return f"All {name}s fetched successfully"
+        elif record is not None:
+            return f"{name} fetched successfully"
+        return f"Operation completed successfully"
+
+    # Convenience methods
+    def get_success_response(self, record: T, message: str = None) -> BaseScheme:
+        return self.success(record=record, message=message, action=None)
 
     def get_create_success_response(self, record: T) -> BaseScheme:
-        """
-        Success response for POST (Create)
-        """
-        return BaseScheme(
-            status="success",
-            message=f"{self.model.__name__} created successfully",
-            data=self.to_dict(record)
-        )
+        return self.success(record=record, action="create")
 
     def get_update_success_response(self, record: T) -> BaseScheme:
-        """
-        Success response for PATCH (Update)
-        """
-        return BaseScheme(
-            status="success",
-            message=f"{self.model.__name__} updated successfully",
-            data=self.to_dict(record)
-        )
+        return self.success(record=record, action="update")
+
+    def get_delete_success_response(self) -> BaseScheme:
+        return self.success(record=None, action="delete")
 
     def get_all_response(self, records: List[T], message: str = None) -> BaseScheme:
-        """
-        Success response for retrieving all records (GET list)
-        """
-        return BaseScheme(
-            status="success",
-            message=message or f"All {self.model.__name__}s fetched successfully",
-            data=[self.to_dict(record) for record in records]
-        )
+        return self.success(record=records, message=message)

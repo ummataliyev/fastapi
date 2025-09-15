@@ -1,7 +1,12 @@
+"""
+Base Repository
+"""
+
 from typing import Any
 from typing import Type
 from typing import List
 from typing import TypeVar
+from typing import Generic
 from typing import Optional
 
 from sqlalchemy.future import select
@@ -10,10 +15,11 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.interfaces.interface import IRepository
 
+
 T = TypeVar("T")
 
 
-class BaseRepository(IRepository):
+class BaseRepository(IRepository[T], Generic[T]):
     def __init__(self, db_session: AsyncSession, model: Type[T]):
         self.db_session = db_session
         self.model = model
@@ -23,9 +29,8 @@ class BaseRepository(IRepository):
         Create a new record
         """
         try:
-            record = self.model(
-                **obj_in if isinstance(obj_in, dict) else obj_in.__dict__, **kwargs
-            )
+            data = obj_in if isinstance(obj_in, dict) else obj_in.__dict__
+            record = self.model(**data, **kwargs)
             self.db_session.add(record)
             await self.db_session.commit()
             await self.db_session.refresh(record)
@@ -39,9 +44,14 @@ class BaseRepository(IRepository):
         Update an existing record
         """
         try:
-            update_data = obj_in if isinstance(obj_in, dict) else obj_in.__dict__
+            if isinstance(obj_in, dict):
+                update_data = obj_in
+            else:
+                update_data = obj_in.__dict__
+
             for key, value in update_data.items():
                 setattr(obj_current, key, value)
+
             self.db_session.add(obj_current)
             await self.db_session.commit()
             await self.db_session.refresh(obj_current)
@@ -80,27 +90,29 @@ class BaseRepository(IRepository):
         self,
         skip: int = 0,
         limit: int = 50,
-        sort_field: Optional[str] = None,
-        sort_order: Optional[str] = None,
+        order_by: Optional[str] = None,
     ) -> List[T]:
         """
-        Get all records with pagination and sorting
+        Get all records with pagination and optional sorting
         """
         try:
             query = select(self.model).offset(skip).limit(limit)
-            if sort_field:
-                column = getattr(self.model, sort_field, None)
+            if order_by:
+                parts = order_by.strip().split()
+                column_name = parts[0]
+                direction = parts[1].lower() if len(parts) > 1 else "asc"
+                column = getattr(self.model, column_name, None)
                 if column is not None:
-                    order_func = getattr(column, sort_order or "asc")
+                    order_func = getattr(column, direction)
                     query = query.order_by(order_func())
             result = await self.db_session.execute(query)
             return result.scalars().all()
         except SQLAlchemyError as e:
             raise e
 
-    async def f(self, **kwargs: Any) -> List[T]:
+    async def filter(self, **kwargs: Any) -> List[T]:
         """
-        Filter records
+        Filter records by criteria
         """
         try:
             result = await self.db_session.execute(
@@ -112,12 +124,24 @@ class BaseRepository(IRepository):
 
     async def get_or_create(self, obj_in: Any, **kwargs: Any) -> T:
         """
-        Get or create a record
+        Get a record if exists, otherwise create it
         """
-        try:
-            record = await self.get(**kwargs)
-            if record:
-                return record
-            return await self.create(obj_in, **kwargs)
-        except SQLAlchemyError as e:
-            raise e
+        record = await self.get(**kwargs)
+        if record:
+            return record
+        return await self.create(obj_in, **kwargs)
+
+    async def exists(self, **kwargs: Any) -> bool:
+        """
+        Check if a record exists
+        """
+        record = await self.get(**kwargs)
+        return record is not None
+
+    async def count(self, **kwargs: Any) -> int:
+        """
+        Count records matching filter criteria
+        """
+        query = select(self.model).filter_by(**kwargs)
+        result = await self.db_session.execute(query)
+        return len(result.scalars().all())
