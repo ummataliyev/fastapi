@@ -1,3 +1,7 @@
+"""
+Pagination and ID encoding/decoding utilities.
+"""
+
 from sqlalchemy import func
 
 from cryptography import fernet
