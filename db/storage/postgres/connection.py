@@ -23,7 +23,7 @@ db_url = f"postgresql+asyncpg://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_
 
 engine = create_async_engine(
     url=db_url,
-    echo=True
+    echo=env.bool("SQL_ECHO", default=False)
 )
 
 async_session = sessionmaker(

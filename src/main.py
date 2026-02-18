@@ -4,7 +4,7 @@ Main file for running the application
 
 from fastapi import FastAPI
 from fastapi.exceptions import HTTPException
-from fastapi.responses import PlainTextResponse
+from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.exceptions import RequestValidationError
 
@@ -12,9 +12,6 @@ from starlette.requests import Request
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 
 from src.routers import routers
-from src.routers import home_router
-
-from db.storage.postgres import async_session
 
 
 app = FastAPI(
@@ -24,25 +21,16 @@ app = FastAPI(
 )
 
 app.include_router(routers)
-app.include_router(home_router)
 
 origins = ["*"]
 
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
-    allow_credentials=True,
+    allow_credentials=False,
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
-
-@app.middleware("http")
-async def db_session_middleware(request: Request, call_next):
-    async with async_session() as session:
-        request.state.db = session
-        response = await call_next(request)
-    return response
 
 
 @app.exception_handler(HTTPException)
@@ -50,7 +38,10 @@ async def http_exception_handler(
     request: Request,
     exc: HTTPException
 ):
-    return PlainTextResponse(str(exc.detail), status_code=exc.status_code)
+    return JSONResponse(
+        status_code=exc.status_code,
+        content={"detail": exc.detail},
+    )
 
 
 @app.exception_handler(RequestValidationError)
@@ -58,13 +49,23 @@ async def validation_exception_handler(
     request: Request,
     exc: RequestValidationError
 ):
-    return PlainTextResponse(str(exc), status_code=400)
+    return JSONResponse(
+        status_code=422,
+        content={"detail": exc.errors()},
+    )
 
 
 @app.on_event('startup')
 async def on_startup():
-    scheduler = AsyncIOScheduler()
-    scheduler.start()
+    app.state.scheduler = AsyncIOScheduler()
+    app.state.scheduler.start()
+
+
+@app.on_event("shutdown")
+async def on_shutdown():
+    scheduler = getattr(app.state, "scheduler", None)
+    if scheduler:
+        scheduler.shutdown(wait=False)
 
 
 if __name__ == "__main__":

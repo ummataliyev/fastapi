@@ -2,4 +2,6 @@
 Initialize responses
 """
 
-from .user import * # noqa
+from .user import UserResponse
+
+__all__ = ["UserResponse"]

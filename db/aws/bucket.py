@@ -7,6 +7,7 @@ import boto3
 from libs.environs import env
 
 AWS_IS_ENABLED = env.bool("AWS_IS_ENABLE", default=False)
+aws_client = None
 
 
 if AWS_IS_ENABLED:

@@ -2,5 +2,7 @@
 Initialize pagination
 """
 
-from .mongo import * # noqa
-from .postgres import * # noqa
+from .mongo import MongoPaginator
+from .postgres import DBPaginator
+
+__all__ = ["MongoPaginator", "DBPaginator"]

@@ -2,4 +2,7 @@
 Initialize limiters
 """
 
-from .throttle import * # noqa
+from .throttle import RequestLimiter
+from .throttle import limiter
+
+__all__ = ["RequestLimiter", "limiter"]

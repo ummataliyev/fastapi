@@ -2,4 +2,6 @@
 Initialize models
 """
 
-from .user import * # noqa
+from .user import User
+
+__all__ = ["User"]

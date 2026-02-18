@@ -1,6 +1,3 @@
 """
-Initilize test
+Tests package.
 """
-
-from .unit import * # noqa
-from .integration import * # noqa

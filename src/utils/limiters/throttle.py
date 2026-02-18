@@ -26,10 +26,10 @@ class RequestLimiter:
         - TIME_GET: Time window (in seconds) for GET requests.
         - TIME_PPD: Time window (in seconds) for PATCH, POST, DELETE requests.
         """
-        self.LIMIT_GET = int(os.getenv("LIMIT_GET"))
-        self.LIMIT_PPD = int(os.getenv("LIMIT_PPD"))
-        self.TIME_GET = int(os.getenv("TIME_GET"))
-        self.TIME_PPD = int(os.getenv("TIME_PPD"))
+        self.LIMIT_GET = int(os.getenv("LIMIT_GET", "100"))
+        self.LIMIT_PPD = int(os.getenv("LIMIT_PPD", "30"))
+        self.TIME_GET = int(os.getenv("TIME_GET", "60"))
+        self.TIME_PPD = int(os.getenv("TIME_PPD", "60"))
 
     def limiter(self, max_requests: int, period: int):
         """
@@ -45,27 +45,35 @@ class RequestLimiter:
         def decorator(func):
             @wraps(func)
             async def wrapper(*args, **kwargs):
-                request = kwargs.get("request")
-                if not request:
-                    raise HTTPException(
-                        status_code=400,
-                        detail="Request object is missing"
-                    )
+                if redis_client is None:
+                    return await func(*args, **kwargs)
+                try:
+                    request = kwargs.get("request")
+                    if not request:
+                        raise HTTPException(
+                            status_code=400,
+                            detail="Request object is missing"
+                        )
 
-                client_ip = request.client.host
-                current_time = int(time.time() // period)
-                action = func.__name__
-                redis_key = f"throttle:{client_ip}:{action}:{current_time}"
-                request_count = redis_client.get(redis_key)
+                    client_ip = request.client.host
+                    current_time = int(time.time() // period)
+                    action = func.__name__
+                    redis_key = f"throttle:{client_ip}:{action}:{current_time}"
+                    request_count = await redis_client.get(redis_key)
 
-                if request_count and int(request_count) >= max_requests:
-                    raise HTTPException(
-                        status_code=429,
-                        detail="Too many requests. Please try again later"
-                    )
+                    if request_count and int(request_count) >= max_requests:
+                        raise HTTPException(
+                            status_code=429,
+                            detail="Too many requests. Please try again later"
+                        )
 
-                redis_client.incr(redis_key)
-                redis_client.expire(redis_key, period)
+                    await redis_client.incr(redis_key)
+                    await redis_client.expire(redis_key, period)
+                except HTTPException:
+                    raise
+                except Exception:
+                    # Degrade gracefully when Redis is unavailable.
+                    return await func(*args, **kwargs)
 
                 return await func(*args, **kwargs)
 

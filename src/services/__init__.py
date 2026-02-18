@@ -1,5 +1,7 @@
 """
-Initilize service
+Initialize services
 """
 
-from .user import * # noqa
+from .user import UserService
+
+__all__ = ["UserService"]

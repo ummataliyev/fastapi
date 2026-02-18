@@ -7,9 +7,9 @@ from typing import Optional
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from utils.helpers.pagination import get_count
-from utils.helpers.pagination import decode_id
-from utils.helpers.pagination import encode_id
+from src.utils.helpers.pagination import get_count
+from src.utils.helpers.pagination import decode_id
+from src.utils.helpers.pagination import encode_id
 
 
 class DBPaginator:

@@ -40,7 +40,7 @@ class UserResponse(BaseResponse[User]):
         :param user: User model instance to convert.
         :return: UserRead schema instance.
         """
-        return UserRead.from_orm(user)
+        return UserRead.model_validate(user)
 
     def get_user(self, user: User) -> BaseScheme:
         """

@@ -9,7 +9,6 @@ from fastapi.templating import Jinja2Templates
 from src.routers import user
 
 routers = APIRouter()
-home_router = APIRouter()
 templates = Jinja2Templates(directory="templates")
 
 

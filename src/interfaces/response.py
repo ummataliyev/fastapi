@@ -37,9 +37,15 @@ class BaseResponse(Generic[T]):
         :param record: Model instance to convert.
         :return: Dictionary representation of the model.
         """
+        if hasattr(record, "model_dump") and callable(record.model_dump):
+            return record.model_dump()
         if hasattr(record, "dict") and callable(record.dict):
             return record.dict()
-        return record.__dict__
+        return {
+            key: value
+            for key, value in vars(record).items()
+            if not key.startswith("_")
+        }
 
     def _build_response(
         self,

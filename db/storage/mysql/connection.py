@@ -25,7 +25,7 @@ DB_URL = f"mysql+aiomysql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME
 
 engine = create_async_engine(
     url=DB_URL,
-    echo=True,
+    echo=env.bool("SQL_ECHO", default=False),
 )
 
 async_session = sessionmaker(

@@ -9,6 +9,7 @@ from typing import TypeVar
 from typing import Generic
 from typing import Optional
 
+from sqlalchemy import func
 from sqlalchemy.future import select
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -37,6 +38,40 @@ class BaseRepository(IRepository[T], Generic[T]):
         self.db_session = db_session
         self.model = model
 
+    @staticmethod
+    def _normalize_input(obj_in: Any) -> dict:
+        """
+        Convert supported payload types to a plain dictionary.
+        """
+        if obj_in is None:
+            return {}
+        if isinstance(obj_in, dict):
+            return dict(obj_in)
+        if hasattr(obj_in, "model_dump") and callable(obj_in.model_dump):
+            return obj_in.model_dump(exclude_unset=True)
+        if hasattr(obj_in, "dict") and callable(obj_in.dict):
+            return obj_in.dict(exclude_unset=True)
+        return {
+            key: value
+            for key, value in vars(obj_in).items()
+            if not key.startswith("_")
+        }
+
+    def _uses_soft_delete(self) -> bool:
+        """
+        Check whether the model supports soft deletion.
+        """
+        return hasattr(self.model, "deleted_at")
+
+    def _default_filters(self, kwargs: dict[str, Any]) -> dict[str, Any]:
+        """
+        Apply default filtering rules (exclude soft-deleted records).
+        """
+        filters = dict(kwargs)
+        if self._uses_soft_delete() and "deleted_at" not in filters:
+            filters["deleted_at"] = None
+        return filters
+
     async def create(self, obj_in: Any, **kwargs: Any) -> T:
         """
         Create a new record in the database.
@@ -47,15 +82,16 @@ class BaseRepository(IRepository[T], Generic[T]):
         :raises SQLAlchemyError: If database operation fails.
         """
         try:
-            data = obj_in if isinstance(obj_in, dict) else obj_in.__dict__
-            record = self.model(**data, **kwargs)
+            data = self._normalize_input(obj_in)
+            data.update(kwargs)
+            record = self.model(**data)
             self.db_session.add(record)
             await self.db_session.commit()
             await self.db_session.refresh(record)
             return record
-        except SQLAlchemyError as e:
+        except SQLAlchemyError:
             await self.db_session.rollback()
-            raise e
+            raise
 
     async def update(self, obj_current: T, obj_in: Any) -> T:
         """
@@ -67,16 +103,16 @@ class BaseRepository(IRepository[T], Generic[T]):
         :raises SQLAlchemyError: If database operation fails.
         """
         try:
-            update_data = obj_in if isinstance(obj_in, dict) else obj_in.__dict__
+            update_data = self._normalize_input(obj_in)
             for key, value in update_data.items():
                 setattr(obj_current, key, value)
             self.db_session.add(obj_current)
             await self.db_session.commit()
             await self.db_session.refresh(obj_current)
             return obj_current
-        except SQLAlchemyError as e:
+        except SQLAlchemyError:
             await self.db_session.rollback()
-            raise e
+            raise
 
     async def get(self, **kwargs: Any) -> Optional[T]:
         """
@@ -87,12 +123,13 @@ class BaseRepository(IRepository[T], Generic[T]):
         :raises SQLAlchemyError: If database operation fails.
         """
         try:
+            filters = self._default_filters(kwargs)
             result = await self.db_session.execute(
-                select(self.model).filter_by(**kwargs)
+                select(self.model).filter_by(**filters)
             )
             return result.scalar_one_or_none()
-        except SQLAlchemyError as e:
-            raise e
+        except SQLAlchemyError:
+            raise
 
     async def delete(self, **kwargs: Any) -> None:
         """
@@ -108,9 +145,9 @@ class BaseRepository(IRepository[T], Generic[T]):
                 raise ValueError("Record not found")
             await self.db_session.delete(record)
             await self.db_session.commit()
-        except SQLAlchemyError as e:
+        except SQLAlchemyError:
             await self.db_session.rollback()
-            raise e
+            raise
 
     async def all(
         self,
@@ -128,19 +165,26 @@ class BaseRepository(IRepository[T], Generic[T]):
         :raises SQLAlchemyError: If database operation fails.
         """
         try:
-            query = select(self.model).offset(skip).limit(limit)
+            query = select(self.model)
+            if self._uses_soft_delete():
+                query = query.where(self.model.deleted_at.is_(None))
             if order_by:
                 parts = order_by.strip().split()
                 column_name = parts[0]
                 direction = parts[1].lower() if len(parts) > 1 else "asc"
+                if direction not in {"asc", "desc"}:
+                    raise ValueError("order_by direction must be 'asc' or 'desc'")
                 column = getattr(self.model, column_name, None)
-                if column is not None:
-                    order_func = getattr(column, direction)
-                    query = query.order_by(order_func())
+                if column is None:
+                    raise ValueError(f"Unknown order_by field: {column_name}")
+                query = query.order_by(
+                    column.asc() if direction == "asc" else column.desc()
+                )
+            query = query.offset(skip).limit(limit)
             result = await self.db_session.execute(query)
             return result.scalars().all()
-        except SQLAlchemyError as e:
-            raise e
+        except SQLAlchemyError:
+            raise
 
     async def filter(self, **kwargs: Any) -> List[T]:
         """
@@ -151,12 +195,13 @@ class BaseRepository(IRepository[T], Generic[T]):
         :raises SQLAlchemyError: If database operation fails.
         """
         try:
+            filters = self._default_filters(kwargs)
             result = await self.db_session.execute(
-                select(self.model).filter_by(**kwargs)
+                select(self.model).filter_by(**filters)
             )
             return result.scalars().all()
-        except SQLAlchemyError as e:
-            raise e
+        except SQLAlchemyError:
+            raise
 
     async def get_or_create(self, obj_in: Any, **kwargs: Any) -> T:
         """
@@ -169,7 +214,9 @@ class BaseRepository(IRepository[T], Generic[T]):
         record = await self.get(**kwargs)
         if record:
             return record
-        return await self.create(obj_in, **kwargs)
+        payload = self._normalize_input(obj_in)
+        payload.update(kwargs)
+        return await self.create(payload)
 
     async def exists(self, **kwargs: Any) -> bool:
         """
@@ -189,6 +236,7 @@ class BaseRepository(IRepository[T], Generic[T]):
         :return: Number of matching records.
         :raises SQLAlchemyError: If database operation fails.
         """
-        query = select(self.model).filter_by(**kwargs)
+        filters = self._default_filters(kwargs)
+        query = select(func.count()).select_from(self.model).filter_by(**filters)
         result = await self.db_session.execute(query)
-        return len(result.scalars().all())
+        return result.scalar_one()

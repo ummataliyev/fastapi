@@ -1,9 +1,17 @@
 """
-Initalize abstracts
+Initialize interfaces
 """
 
-from .scheme import * # noqa
-from .service import * # noqa
-from .response import * # noqa
-from .interface import * # noqa
-from .repository import * # noqa
+from .interface import IRepository
+from .repository import BaseRepository
+from .response import BaseResponse
+from .scheme import BaseScheme
+from .service import BaseService
+
+__all__ = [
+    "IRepository",
+    "BaseRepository",
+    "BaseResponse",
+    "BaseScheme",
+    "BaseService",
+]
